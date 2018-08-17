@@ -105,12 +105,36 @@ const participantPositions = [
     changedDate: createdDate
   }
 ]
+
+const settlement = {
+  'settlementId': 8765,
+  'reason': 'Test s',
+  createdDate
+}
+
+const settlementWindow = {
+  'settlementWindowId': 6789,
+  'reason': 'Test sw',
+  createdDate
+}
+
+const settlementSettlementWindow = {
+  'settlementSettlementWindowId': 12345,
+  'settlementId': 8765,
+  'settlementWindowId': 6789,
+  createdDate
+}
+
 exports.seed = async function (knex) {
   try {
     await knex('participant').insert(participants)
     await knex('participantCurrency').insert(participantCurrencies)
     await knex('participantLimit').insert(participantLimits)
     await knex('participantPosition').insert(participantPositions)
+    await knex('settlement').insert(settlement)
+    await knex('settlementWindow').insert(settlementWindow)
+    await knex('settlementSettlementWindow').insert(settlementSettlementWindow)
+    await knex('transferFulfilment').where({isValid: 1}).update({settlementWindowId: 6789})
     return true
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') return -1001

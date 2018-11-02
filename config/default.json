@@ -32,6 +32,15 @@
       "TIMEZONE": "UTC"
     }
   },
+  "INSTRUMENTATION": {
+    "METRICS": {
+      "DISABLED": false,
+      "config": {
+        "timeout": 5000,
+        "prefix": "moja_cl_"
+      }
+    }
+  },
   "PARTICIPANT_INITIAL_POSTITION": 0,
   "HUB_OPERATOR_CODE": 1,
   "INTERNAL_TRANSFER_VALIDITY_SECONDS": "432000",

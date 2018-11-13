@@ -55,6 +55,7 @@ let firstLine
 let lastLine
 let perEntryResponse = []
 let lineCount = 0
+let transfersThatTakeLongerThanASecond = 0
 
 function compare (a, b) {
   const timestampA = a.timestamp
@@ -97,6 +98,9 @@ lr.on('line', function (line) {
       if (entry.entries.length === parseInt(argv.num)) {
         entry.totalDifference = new Date(entry.entries[entry.entries.length - 1].timestamp).getTime() - new Date(entry.entries[0].timestamp).getTime()
         perEntryResponse.push(entry.totalDifference)
+        if (entry.totalDifference >= 1000) {
+          transfersThatTakeLongerThanASecond++
+        }
       }
       logMap[logLine.uuid] = entry
     }
@@ -105,6 +109,13 @@ lr.on('line', function (line) {
 })
 
 lr.on('end', function () {
+  const mean = perEntryResponse.reduce((a, b) => a + b) / perEntryResponse.length
+  let differenceFromMeanSquared = []
+  for (let entry of perEntryResponse) {
+    differenceFromMeanSquared.push(Math.pow((entry - mean), 2))
+  }
+  let variance = differenceFromMeanSquared.reduce((a, b) => a + b) / differenceFromMeanSquared.length
+  let standardDeviation = Math.sqrt(variance)
   const firstTime = new Date(firstLine.timestamp).getTime()
   const lastTime = new Date(lastLine.timestamp).getTime()
   const totalTime = (lastTime - firstTime)
@@ -112,7 +123,6 @@ lr.on('end', function () {
   const sortedPerEntryResponse = perEntryResponse.sort(compareNumbers)
   const shortestResponse = sortedPerEntryResponse[0]
   const longestResponse = sortedPerEntryResponse[perEntryResponse.length - 1]
-  const averageTransaction = (perEntryResponse.reduce((a, b) => a + b, 0) / totalTransactions)
 
   console.log('First request: ' + firstLine.timestamp)
   console.log('Last request: ' + lastLine.timestamp)
@@ -121,6 +131,9 @@ lr.on('end', function () {
   console.log('Total difference of all requests in milliseconds: ' + (totalTime))
   console.log('Shortest response time in millisecond: ' + shortestResponse)
   console.log('Longest response time in millisecond: ' + longestResponse)
-  console.log('The average time a transaction takes in milliseconds: ' + averageTransaction)
+  console.log('Mean/The average time a transaction takes in millisecond: ' + mean)
+  console.log('Variance in milliseconds: ' + variance)
+  console.log('Standard deviation in milliseconds: ' + standardDeviation)
+  console.log('Number of entries that took longer than a second: ' + transfersThatTakeLongerThanASecond)
   console.log('Average transactions per second: ' + (totalTransactions / (totalTime / 1000)))
 })

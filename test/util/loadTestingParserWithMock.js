@@ -56,6 +56,7 @@ let lastLine
 let perEntryResponse = []
 let lineCount = 0
 let transfersThatTakeLongerThanASecond = 0
+let beginTime = new Date().getTime()
 
 function compare (a, b) {
   const timestampA = a.timestamp
@@ -135,5 +136,7 @@ lr.on('end', function () {
   console.log('Variance in milliseconds: ' + variance)
   console.log('Standard deviation in milliseconds: ' + standardDeviation)
   console.log('Number of entries that took longer than a second: ' + transfersThatTakeLongerThanASecond)
+  console.log(`% of entries that took longer than a second: ${(transfersThatTakeLongerThanASecond / totalTransactions * 100).toFixed(2)}%`)
   console.log('Average transactions per second: ' + (totalTransactions / (totalTime / 1000)))
+  console.log('Total time that script takes to run in seconds: ' + (new Date().getTime() - beginTime) / 1000)
 })

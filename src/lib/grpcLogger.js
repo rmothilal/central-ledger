@@ -1,5 +1,6 @@
 'use strict'
 const eventSDK = require('@mojaloop/event-sdk')
+const EventTraceMetadata = require('@mojaloop/event-sdk').EventTraceMetadata
 const DefaultEventLogger = require('@mojaloop/event-sdk').DefaultEventLogger
 const _ = require('lodash')
 
@@ -41,10 +42,12 @@ const createChildSpan = async (message, service) => {
   if (!grpcLogger) {
     grpcLogger = new DefaultEventLogger()
   }
+
+  let eventTraceMetaData = new EventTraceMetadata(service, message.metadata.trace.traceId, message.metadata.trace.parentSpanId, message.metadata.trace.spanId , message.metadata.trace.sampled, message.metadata.trace.startTimestamp)
   let traceMessage = _.cloneDeep(message)
   traceMessage.metadata.event.type = eventSDK.TraceEventTypeAction.type
   traceMessage.metadata.event.action = eventSDK.TraceEventAction.span
-  let response = await grpcLogger.createChildSpanForMessageEnvelope(traceMessage, traceMessage.metadata.trace, service, { startTimestamp: new Date().toISOString() })
+  let response = await grpcLogger.createChildSpanForMessageEnvelope(traceMessage, eventTraceMetaData, service, { startTimestamp: new Date().toISOString() })
   message.metadata.trace = _.cloneDeep(traceMessage.metadata.trace)
   return response
 }
